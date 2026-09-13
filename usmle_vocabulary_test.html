@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>USMLE Vocabulary Test</title>
+  <style>
+    :root{
+      --bg:#f6f7f9;
+      --card:#ffffff;
+      --text:#1f2937;
+      --muted:#6b7280;
+      --border:#d1d5db;
+      --accent:#2563eb;
+      --good:#15803d;
+      --bad:#b91c1c;
+      --soft:#eef2ff;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+      background:var(--bg);
+      color:var(--text);
+    }
+    .wrap{
+      max-width:850px;
+      margin:0 auto;
+      padding:24px 16px 48px;
+    }
+    .hero{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:18px;
+      padding:22px;
+      margin-bottom:18px;
+    }
+    h1{margin:0 0 8px;font-size:28px}
+    .sub{color:var(--muted);line-height:1.5}
+    .progress{
+      height:10px;
+      background:#e5e7eb;
+      border-radius:999px;
+      overflow:hidden;
+      margin-top:16px;
+    }
+    .bar{
+      height:100%;
+      width:0%;
+      background:var(--accent);
+      transition:width .25s ease;
+    }
+    .question{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:18px;
+      padding:22px;
+      margin-top:16px;
+    }
+    .qnum{font-size:13px;color:var(--muted);margin-bottom:8px}
+    .qtext{font-size:20px;font-weight:700;line-height:1.4;margin-bottom:16px}
+    .option{
+      display:block;
+      width:100%;
+      text-align:left;
+      border:1px solid var(--border);
+      background:white;
+      border-radius:12px;
+      padding:14px 16px;
+      margin:10px 0;
+      font-size:16px;
+      cursor:pointer;
+    }
+    .option:hover{border-color:var(--accent)}
+    .option.selected{border-color:var(--accent);background:var(--soft)}
+    .actions{
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      margin-top:18px;
+    }
+    button{
+      border:0;
+      border-radius:12px;
+      padding:12px 18px;
+      font-size:16px;
+      cursor:pointer;
+    }
+    .secondary{background:#e5e7eb;color:var(--text)}
+    .primary{background:var(--accent);color:white}
+    .primary:disabled{opacity:.5;cursor:not-allowed}
+    .result{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:18px;
+      padding:24px;
+      margin-top:16px;
+    }
+    .score{
+      font-size:34px;
+      font-weight:800;
+      margin-bottom:4px;
+    }
+    .review-item{
+      border-top:1px solid var(--border);
+      padding:16px 0;
+    }
+    .review-item:first-of-type{border-top:0}
+    .correct{color:var(--good);font-weight:700}
+    .incorrect{color:var(--bad);font-weight:700}
+    .explanation{color:var(--muted);margin-top:6px;line-height:1.5}
+    .hidden{display:none}
+    @media (max-width:600px){
+      h1{font-size:24px}
+      .qtext{font-size:18px}
+      .actions{flex-direction:column}
+      .actions button{width:100%}
+    }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <div class="hero">
+    <h1>USMLE Vocabulary Test</h1>
+    <div class="sub">10 вопросов по лексике из ваших Quizlet-наборов. Выберите один ответ. После завершения тест покажет балл и разбор ошибок.</div>
+    <div class="progress"><div class="bar" id="bar"></div></div>
+  </div>
+
+  <div id="quiz"></div>
+  <div id="result" class="result hidden"></div>
+</div>
+
+<script>
+const questions = [
+  {
+    q:"У пациента выражение эмоций заметно снижено, но не отсутствует полностью. Какой термин подходит лучше всего?",
+    options:["blunted affect","flat affect","tangential manner","derealization"],
+    answer:0,
+    exp:"Blunted affect означает выраженное снижение эмоциональной экспрессии, при котором эмоциональные реакции всё же сохраняются."
+  },
+  {
+    q:"У пациента возникает резкая трудно сдерживаемая потребность немедленно помочиться. Как называется этот симптом?",
+    options:["overflow of urine","urinary urgency","stomach cramps","congestion"],
+    answer:1,
+    exp:"Urinary urgency — внезапный трудно сдерживаемый позыв к мочеиспусканию."
+  },
+  {
+    q:"Какое выражение означает «данные соответствуют предполагаемому диагнозу»?",
+    options:["suggestive of","associated with","consistent with","according to"],
+    answer:2,
+    exp:"Consistent with означает, что данные соответствуют или согласуются с определённым диагнозом."
+  },
+  {
+    q:"При пальпации живота пациент напрягает мышцы брюшной стенки. Как называется этот признак?",
+    options:["guarding","rebound tenderness","nuchal rigidity","flank pain"],
+    answer:0,
+    exp:"Guarding — защитное напряжение мышц живота при пальпации."
+  },
+  {
+    q:"Пациент после падения «получил травму плеча». Какое медицинское сочетание наиболее естественно?",
+    options:["obtained an injury","sustained an injury","resolved an injury","measured an injury"],
+    answer:1,
+    exp:"Sustain an injury — стандартное сочетание со значением «получить травму»."
+  },
+  {
+    q:"У пациента фиксированное ложное убеждение, которое сохраняется несмотря на доказательства обратного. Какой термин используется?",
+    options:["derealization","delusion","reassurance","recollection"],
+    answer:1,
+    exp:"Delusion — стойкое ложное убеждение, сохраняющееся несмотря на доказательства обратного."
+  },
+  {
+    q:"Как называется лечение, которое применяют для прекращения уже начавшегося приступа мигрени?",
+    options:["abortive therapy","elective therapy","reassurance","treatment regimen"],
+    answer:0,
+    exp:"Abortive therapy направлена на купирование уже начавшегося приступа."
+  },
+  {
+    q:"Что означает фраза “sensation is intact” в неврологической виньетке?",
+    options:["чувствительность сохранена","пациент в сознании","объём движений сохранён","память сохранена"],
+    answer:0,
+    exp:"Sensation is intact означает, что при обследовании чувствительность сохранена."
+  },
+  {
+    q:"У пациента митральный стеноз. На верхушке сердца выслушивается низкочастотный шум во время диастолы. Какое выражение подходит?",
+    options:["carotid bruit","diastolic rumble","crushing pain","opening snap"],
+    answer:1,
+    exp:"Diastolic rumble — низкочастотный диастолический шум, классически связанный с митральным стенозом."
+  },
+  {
+    q:"Какое выражение лучше всего описывает передачу ключевой клинической информации и ответственности от одного медицинского работника другому?",
+    options:["patient handoff","sign-out notes","provide care","assessment"],
+    answer:0,
+    exp:"Patient handoff — передача пациента, ответственности и ключевой клинической информации между медицинскими работниками или командами."
+  }
+];
+
+let current = 0;
+let answers = Array(questions.length).fill(null);
+
+const quizEl = document.getElementById("quiz");
+const resultEl = document.getElementById("result");
+const barEl = document.getElementById("bar");
+
+function render(){
+  const q = questions[current];
+  barEl.style.width = `${(current/questions.length)*100}%`;
+  quizEl.innerHTML = `
+    <div class="question">
+      <div class="qnum">Вопрос ${current+1} из ${questions.length}</div>
+      <div class="qtext">${q.q}</div>
+      <div id="opts">
+        ${q.options.map((o,i)=>`<button class="option ${answers[current]===i?'selected':''}" data-i="${i}">${String.fromCharCode(65+i)}. ${o}</button>`).join("")}
+      </div>
+      <div class="actions">
+        <button class="secondary" id="prev" ${current===0?'disabled':''}>Назад</button>
+        <button class="primary" id="next" ${answers[current]===null?'disabled':''}>${current===questions.length-1?'Завершить':'Далее'}</button>
+      </div>
+    </div>`;
+  document.querySelectorAll(".option").forEach(btn=>{
+    btn.addEventListener("click",()=>{
+      answers[current]=Number(btn.dataset.i);
+      render();
+    });
+  });
+  document.getElementById("prev").addEventListener("click",()=>{ if(current>0){current--;render();}});
+  document.getElementById("next").addEventListener("click",()=>{
+    if(answers[current]===null) return;
+    if(current<questions.length-1){current++;render();} else {finish();}
+  });
+}
+
+function finish(){
+  quizEl.classList.add("hidden");
+  barEl.style.width = "100%";
+  let score=0;
+  questions.forEach((q,i)=>{ if(answers[i]===q.answer) score++; });
+  const percent = Math.round(score/questions.length*100);
+  resultEl.classList.remove("hidden");
+  resultEl.innerHTML = `
+    <div class="score">${score}/${questions.length} (${percent}%)</div>
+    <div class="sub">${percent>=80?'Хороший результат.':'Ниже — разбор ответов для повторения.'}</div>
+    <div style="margin-top:18px">
+      ${questions.map((q,i)=>{
+        const ok = answers[i]===q.answer;
+        return `<div class="review-item">
+          <div><strong>${i+1}. ${q.q}</strong></div>
+          <div class="${ok?'correct':'incorrect'}" style="margin-top:8px">${ok?'Верно':'Ошибка'}: ${q.options[answers[i]] ?? 'нет ответа'}</div>
+          ${!ok?`<div style="margin-top:4px"><strong>Правильный ответ:</strong> ${q.options[q.answer]}</div>`:''}
+          <div class="explanation">${q.exp}</div>
+        </div>`;
+      }).join("")}
+    </div>
+    <button class="primary" id="restart" style="margin-top:16px">Пройти ещё раз</button>
+  `;
+  document.getElementById("restart").addEventListener("click",()=>{
+    current=0;
+    answers=Array(questions.length).fill(null);
+    resultEl.classList.add("hidden");
+    quizEl.classList.remove("hidden");
+    render();
+  });
+}
+
+render();
+</script>
+</body>
+</html>
